@@ -103,22 +103,22 @@ $(ZLIB_LIB): $(ZLIB_UNPACKED)
 	(cd $(ZLIB_DIR) && export CFLAGS='-fPIC'; export CXXFLAGS='-fPIC'; ./configure)
 	(cd $(ZLIB_DIR) && make)
 
-LZMA_ARCHIVE:=$(TARGET)/lzma-$(LZMA_VERSION).tar.gz
-LZMA_UNPACKED:=$(TARGET)/lzma-unpack.log
-LZMA_DIR=$(TARGET)/lzma-$(LZMA_VERSION)
-LZMA_LIB=$(LZMA_DIR)/src/sdk/7zip/Compress/LZMA/libLZMA.a
+XZ_ARCHIVE:=$(TARGET)/xz-$(XZ_VERSION).tar.gz
+XZ_UNPACKED:=$(TARGET)/xz-unpack.log
+XZ_DIR=$(TARGET)/xz-$(XZ_VERSION)
+XZ_LIB=$(XZ_DIR)/src/sdk/7zip/Compress/XZ/libLZMA.a
 
-$(LZMA_ARCHIVE):
+$(XZ_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o $@ http://tukaani.org/lzma/lzma-$(LZMA_VERSION).tar.gz
+	curl -o $@ http://tukaani.org/xz/xz-$(XZ_VERSION).tar.gz
 	
-$(LZMA_UNPACKED): $(LZMA_ARCHIVE)
+$(XZ_UNPACKED): $(XZ_ARCHIVE)
 	tar -xzf $< -C $(TARGET)
 	touch $@
 
-$(LZMA_LIB): $(LZMA_UNPACKED)
-	if [ ! -f $(LZMA_DIR)/Makefile ]; then (cd $(LZMA_DIR) && ./configure $(LZMA_CONFIG_FLAGS)); fi;
-	(cd $(LZMA_DIR) && make)
+$(XZ_LIB): $(XZ_UNPACKED)
+	if [ ! -f $(XZ_DIR)/Makefile ]; then (cd $(XZ_DIR) && ./configure $(XZ_CONFIG_FLAGS)); fi;
+	(cd $(XZ_DIR) && make)
 
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
@@ -150,7 +150,7 @@ $(SPATIALITE_LIB): $(SPATIALITE_UNPACKED)
 	if [ ! -f $(SPATIALITE_DIR)/Makefile ]; then (cd $(SPATIALITE_DIR) && ./configure $(SPATIALITE_CONFIG_FLAGS)); fi;
 	(cd $(SPATIALITE_DIR) && make)
 
-CFLAGS:= -I$(ZLIB_DIR) -I$(LZMA_DIR)/src -I$(LIBXML2_DIR)/include -I$(PROJ_DIR)/src -I$(GEOS_DIR)/include -I$(ICONV_DIR)/include -I$(OUT_DIR) -I$(SQLITE_AMAL_DIR) -I$(SPATIALITE_DIR)/src/headers -I$(SPATIALITE_DIR)/src/include $(CFLAGS)
+CFLAGS:= -I$(ZLIB_DIR) -I$(XZ_DIR)/src -I$(LIBXML2_DIR)/include -I$(PROJ_DIR)/src -I$(GEOS_DIR)/include -I$(ICONV_DIR)/include -I$(OUT_DIR) -I$(SQLITE_AMAL_DIR) -I$(SPATIALITE_DIR)/src/headers -I$(SPATIALITE_DIR)/src/include $(CFLAGS)
 
 $(OUT_DIR)/org/spatialite/%.class: src/main/java/org/spatialite/%.java
 	@mkdir -p $(@D)
@@ -166,7 +166,7 @@ test:
 
 clean: clean-native clean-java clean-tests
 
-$(OUT_DIR)/sqlite3.o : $(LZMA_LIB) $(ZLIB_LIB) $(LIBXML2_LIB) $(PROJ_LIB) $(GEOS_LIB) $(SQLITE_UNPACKED) $(SPATIALITE_LIB) $(ICONV_LIB)
+$(OUT_DIR)/sqlite3.o : $(XZ_LIB) $(ZLIB_LIB) $(LIBXML2_LIB) $(PROJ_LIB) $(GEOS_LIB) $(SQLITE_UNPACKED) $(SPATIALITE_LIB) $(ICONV_LIB)
 	@mkdir -p $(@D)
 	perl -p -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    $(SQLITE_AMAL_DIR)/sqlite3ext.h > $(OUT_DIR)/sqlite3ext.h
@@ -251,8 +251,8 @@ clean-native:
 	rm -f $(LIBXML2_UNPACKED)
 	rm -rf $(ZLIB_DIR)
 	rm -f $(ZLIB_UNPACKED)
-	rm -rf $(LZMA_DIR)
-	rm -f $(LZMA_UNPACKED)
+	rm -rf $(XZ_DIR)
+	rm -f $(XZ_UNPACKED)
 	rm -rf $(ICONV_DIR)
 	rm -f $(ICONV_UNPACKED)
 
